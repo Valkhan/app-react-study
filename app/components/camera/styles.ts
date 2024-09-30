@@ -1,9 +1,15 @@
 import { StyleSheet } from "react-native";
 
-const styles = StyleSheet.create({
+const CameraStyles = StyleSheet.create({
     container: {
         flex: 1,
         justifyContent: 'center',
+    },
+    bottomContainer: {
+        position: 'absolute',
+        bottom: 0,
+        backgroundColor: '#ccc',
+        minWidth: '100%'
     },
     message: {
         textAlign: 'center',
@@ -30,4 +36,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default styles;
+export default CameraStyles;
