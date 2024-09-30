@@ -1,4 +1,4 @@
-import { CameraView, CameraType, useCameraPermissions, Camera } from 'expo-camera';
+import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
 import { useState, useEffect } from 'react';
 import { Button, Text, View, Platform } from 'react-native';
 import CameraStyles from "./components/camera/styles"
@@ -12,6 +12,52 @@ export default function App() {
   // Geolocation
   const [location, setLocation] = useState(null);
   const [setErrorMsg] = useState(null);
+  const [geoFence, setGeofence] = useState({
+    name: "Carregando",
+    latitude: 0,
+    longitude: 0
+  });
+  const currentRoute = [
+    {
+      name: "Estante",
+      latitude: -23.535988,
+      longitude: -46.884819
+    },
+    {
+      name: "Bancada 1",
+      latitude: -23.535986,
+      longitude: -46.884811
+    },
+    {
+      name: "Bancada 3",
+      latitude: -23.536007,
+      longitude: -46.884832
+    },
+    {
+      name: "Bancada 6",
+      latitude: -23.535983,
+      longitude: -46.884832
+    },
+  ];
+
+  // Função para calcular a distância entre duas coordenadas (em metros)
+  function haversineDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371e3; // Raio da Terra em metros
+    const toRadians = (degrees) => (degrees * Math.PI) / 180;
+    const dLat = toRadians(lat2 - lat1);
+    const dLon = toRadians(lon2 - lon1);
+    const lat1Rad = toRadians(lat1);
+    const lat2Rad = toRadians(lat2);
+
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(lat1Rad) * Math.cos(lat2Rad) *
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+    return R * c; // Distância em metros
+  }
 
   useEffect(() => {
     let locationSubscription;
@@ -39,6 +85,28 @@ export default function App() {
         },
         (newLocation) => {
           setLocation(newLocation);
+          // Verifica a proximidade com os pontos da rota
+          let closestPoint = null;
+          let minDistance = Infinity;
+
+          currentRoute.forEach((point) => {
+            const distance = haversineDistance(
+              newLocation.coords.latitude,
+              newLocation.coords.longitude,
+              point.latitude,
+              point.longitude
+            );
+
+            if (distance < minDistance) {
+              minDistance = distance;
+              closestPoint = point;
+            }
+          });
+
+          // Atualiza a geoFence se estiver dentro de um raio de 1 metro
+          if (minDistance <= 1) {
+            setGeofence(closestPoint);
+          }
         }
       );
     })();
@@ -72,8 +140,9 @@ export default function App() {
     <View style={CameraStyles.container}>
       <CameraView style={CameraStyles.camera} facing={facing}></CameraView>
       <View style={CameraStyles.bottomContainer}>
+        <Text style={CameraStyles.text}>{geoFence.name}</Text>
         <Text>Accuracy: {location?.coords?.accuracy}</Text>
-        <Text>Coords: {location?.coords?.latitude} | {location?.coords?.longitude}</Text>
+        <Text>Coords: {location?.coords?.latitude?.toFixed(6)} | {location?.coords?.longitude?.toFixed(6)}</Text>
         <Text>H: {location?.coords?.heading} | S: {location?.coords?.speed} </Text>
         <Text>Timestamp: {location?.timestamp}</Text>
       </View>
