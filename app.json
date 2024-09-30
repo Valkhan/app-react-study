@@ -19,7 +19,12 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_BACKGROUND_LOCATION" // Permissão para localização em segundo plano
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -34,6 +39,12 @@
           "cameraPermission": "Permitir $(PRODUCT_NAME) acessar sua camera",
           "microphonePermission": "Permitir $(PRODUCT_NAME) acessar seu microfone",
           "recordAudioAndroid": true
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Permitir $(PRODUCT_NAME) usar sua localização."
         }
       ]
     ],
